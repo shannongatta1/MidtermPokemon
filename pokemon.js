@@ -324,4 +324,4 @@ var options = dropDown.selectAll("option")
 	// data(function(a) { return d3.ascending(a.Type_1); })//might need to put b.type_1 back in
 	// console.log(data)
 
-	
+<script src="//d3js.org/d3.v5.min.js"></script>	
