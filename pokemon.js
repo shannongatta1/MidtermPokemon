@@ -252,7 +252,7 @@ var options = dropDown.selectAll("option")
 		//   y: h,
 		//   width: 10,
 		//   height: 12
-		.attr('x', function(d, i) { return (40 + i*50);})
+		.attr('x', function(d, i) { return (60 + i*50);})
 		.attr('y', h)
 		.attr('width', 10)
 		.attr('height', 12)
@@ -264,16 +264,17 @@ var options = dropDown.selectAll("option")
         svg.selectAll("text")
 			.data(types)
         .enter().append("text")
-		// .attr({
-		// x: function(d, i) { return (40 + i*50); },
-		// y: h + 24,
-		// })
-		// .text(function(d) { return d; });
-		.attr('x', function(d, i) { return (40 + i*50);})
+		.attr('x', function(d, i) { return (60 + i*50);})
 		.attr('y', h + 24)
+		.text(function(d) { return d; });
+	
+	svg.append("text")
+		.attr("text-anchor", "end")
+		.attr("x", w -900)
+		.attr("y", h - margin.t +40)
+		.text("Type 1");
+		// .bold();
 
-		.style("fill", function(d,i) { 
-			return d;});
 		
 
 	// draw axes and axis labels
