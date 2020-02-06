@@ -7,10 +7,12 @@
 		y = d3.scaleLinear().range([h - 60, 0]),
 		//colors that will reflect geographical regions
 		color = {
-
+//color change
 			"Bug": "#4E79A7",
 		
 			"Dark": "#A0CBE8",
+
+			"Dragon": "#cc3399",
 		
 			"Electric": "#F28E2B",
 		
@@ -19,6 +21,8 @@
 			"Fighting": "#59A14F",
 		
 			"Fire": "#8CD17D",
+
+			"Flying": "#e6e600",
 		
 			"Ghost": "#B6992D",
 		
@@ -36,7 +40,7 @@
 		
 			"Steel": "#BAB0AC",
 		
-			"Water": "#D37295"
+			"Water": "#660066"
 		
 		}
 
@@ -81,24 +85,85 @@
 	// console.log(a);
 
 
-	let filtered_gendata = data.map( function(d){
-		return d['Generation'];})
-		const distinct_gen = [...new Set(filtered_gendata)];
+	// let filtered_gendata = data.map( function(d){
+	// 	return d['Generation'];})
+		const distinct_gen = ["All", 1, 2, 3, 4, 5, 6];//[...new Set(filtered_gendata)];
 		
 
 	var dropDownChange= function(){
-		var newGen = d3.select(this).property('value'),
-		newData = data[newGen];
-		mouseOn(newData);
-	}	
-	var dropDown = d3.select("#filter").append("select")
+
+		// var newGen = this.options[this.selectedIndex].value
+		var filter1 = document.getElementById("gen");
+		var newGen = filter1.options[filter1.selectedIndex].value
+		var filter2 = document.getElementById("legend");
+		var newLegend = filter2.options[filter2.selectedIndex].value
+
+
+
+		let circles = d3.selectAll("circle")
+		circles.attr("display", "inline")
+		if (newGen == "All" && newLegend == "All" ){
+			return ;
+		} else if (newGen == "All" && newLegend != "All") {
+			circles.filter(function(d){
+				return ( d["Legendary"] != newLegend);
+			})
+			.attr("display", "none")
+		} else if (newLegend == "All" && newGen != "All") {
+			circles.filter(function(d){
+				return ( d["Generation"] != newGen);
+			})
+			.attr("display", "none")
+		} else {
+		circles.filter(function(d){
+			return !(d["Generation"] == newGen && d["Legendary"] == newLegend);
+		})
+		.attr("display", "none")
+	}}
+	// if (filter2 != "All"){
+	// 	circles.filter((function(d){
+	// 		return d["Legendary"] != filter2;
+	// 	}))
+		
+
+	
+
+	// var dropDownChange2= function(){
+	// 	var newGen2 = this.options[this.selectedIndex].value
+
+	// 	newData2 = data.filter(function(d){
+	// 		return d["Legendary"] == newGen2;
+	// 	});
+		
+	// 	let circles = d3.selectAll("circle")
+	// 	circles.attr("display", "inline")
+	// 	if (newGen2 != "All"){
+	// 	circles.filter((function(d){
+	// 		return d["Legendary"] != newGen2;
+	// 	}))
+	// 	.attr("display", "none")
+	// }}
+
+	var dropDown = d3.select("#filter1").append("select").attr('id', "gen")
+	.on("change", dropDownChange)
 	.selectAll('option')
 	.data(distinct_gen)
     .enter()
     .append("option")
     .text(function(d){return d;})
 	.attr("value",function(d){return d;})
-	.on("change", dropDownChange);
+
+	let legend_list = ["All", "TRUE", "FALSE"];
+
+	var dropDown2 = d3.select("#filter2").append("select").attr('id', "legend")
+	.on("change", dropDownChange)
+	.selectAll('option')
+	.data(legend_list)
+    .enter()
+    .append("option")
+    .text(function(d){return d;})
+	.attr("value",function(d){return d;})
+
 
 	
 
@@ -108,12 +173,6 @@
 		.data(data)
 	  .enter().append("circle")
 	  .attr("class", "circles")
-	//   .attr({
-	//     cx: function(d) { return x(+d.SpDef); },
-	//     cy: function(d) { return y(+d.Total); },
-	//     r: 8,
-	//     id: function(d) { return d.Type_1; }
-	//   })
 		.attr('cx',  function(d) { return x(+d.SpDef); })
 		.attr('cy',  function(d) { return y(+d.Total); })
 		.attr('r', 8)
@@ -129,8 +188,18 @@
             .style("top", (d3.event.pageY - 28) + "px");
 
 			})	
-		  
+		.on("mouseout", function(d){	
+				div.transition()		
+					.duration(500)		
+					.style("opacity", 0);	
+		});
+		
 var options = dropDown.selectAll("option")
+           .data(data)
+         .enter()
+		   .append("option");
+
+		   var options = dropDown2.selectAll("option")
            .data(data)
          .enter()
 		   .append("option");
@@ -154,53 +223,50 @@ var options = dropDown.selectAll("option")
 //        .attr("value", function (d) { return d.Type_1; });
        
 	// what to do when we mouse over a bubble
-	var mouseOn = function() { 
-		var circle = d3.select(this);
+	// var mouseOn = function() { 
+	// 	var circle = d3.select(this);
+	
 
-	// transition to increase size/opacity of bubble
-		circle.transition()
-		.duration(800).style("opacity", 1)
-		.attr("r", 16).ease("elastic");
+	// // transition to increase size/opacity of bubble
+	// 	circle.transition()
+	// 	.duration(800).style("opacity", 1)
+	// 	.attr("r", 16).ease("elastic");
 
-		// append lines to bubbles that will be used to show the precise data points.
-		// translate their location based on margins
-		svg.append("g")
-			.attr("class", "guide")
-		.append("line")
-			.attr("x1", circle.attr("cx"))
-			.attr("x2", circle.attr("cx"))
-			.attr("y1", +circle.attr("cy") + 26)
-			.attr("y2", h - margin.t - margin.b)
-			.attr("transform", "translate(40,20)")
-			.style("stroke", circle.style("fill"))
-			.transition().delay(200).duration(400).styleTween("opacity", 
-						function() { return d3.interpolate(0, .5); })
+	// 	// append lines to bubbles that will be used to show the precise data points.
+	// 	// translate their location based on margins
+	// 	svg.append("g")
+	// 		.attr("class", "guide")
+	// 	.append("line")
+	// 		.attr("x1", circle.attr("cx"))
+	// 		.attr("x2", circle.attr("cx"))
+	// 		.attr("y1", +circle.attr("cy") + 26)
+	// 		.attr("y2", h - margin.t - margin.b)
+	// 		.attr("transform", "translate(40,20)")
+	// 		.style("stroke", circle.style("fill"))
+	// 		.transition().delay(200).duration(400).styleTween("opacity", 
+	// 					function() { return d3.interpolate(0, .5); })
 
-		svg.append("g")
-			.attr("class", "guide")
-		.append("line")
-			.attr("x1", +circle.attr("cx") - 16)
-			.attr("x2", 0)
-			.attr("y1", circle.attr("cy"))
-			.attr("y2", circle.attr("cy"))
-			.attr("transform", "translate(40,30)")
-			.style("stroke", circle.style("fill"))
-			.transition().delay(200).duration(400).styleTween("opacity", 
-						function() { return d3.interpolate(0, .5); });
+	// 	svg.append("g")
+	// 		.attr("class", "guide")
+	// 	.append("line")
+	// 		.attr("x1", +circle.attr("cx") - 16)
+	// 		.attr("x2", 0)
+	// 		.attr("y1", circle.attr("cy"))
+	// 		.attr("y2", circle.attr("cy"))
+	// 		.attr("transform", "translate(40,30)")
+	// 		.style("stroke", circle.style("fill"))
+	// 		.transition().delay(200).duration(400).styleTween("opacity", 
+	// 					function() { return d3.interpolate(0, .5); });
 
-	// function to move mouseover item to front of SVG stage, in case
-	// another bubble overlaps it
-		d3.selection.prototype.moveToFront = function() { 
-		  return this.each(function() { 
-			this.parentNode.appendChild(this); 
-		  }); 
-		};
+	// // function to move mouseover item to front of SVG stage, in case
+	// // another bubble overlaps it
+	// 	d3.selection.prototype.moveToFront = function() { 
+	// 	  return this.each(function() { 
+	// 		this.parentNode.appendChild(this); 
+	// 	  }); 
+	// 	};
 
-	// skip this functionality for IE9, which doesn't like it
-		// if (!$.browser.msie) {
-		// 	circle.moveToFront();	
-		// 	}
-	};
+
 	// what happens when we leave a bubble?
 	var mouseOff = function() {
 		var circle = d3.select(this);
@@ -214,11 +280,12 @@ var options = dropDown.selectAll("option")
 		d3.selectAll(".guide").transition().duration(100).styleTween("opacity", 
 						function() { return d3.interpolate(.5, 0); })
 			.remove()
+		
 	};
 
 	// run the mouseon/out functions
 	// circles.on("mouseover", mouseOn);
-	// circles.on("mouseout", mouseOff);
+
 
 
     //tooltips
@@ -272,7 +339,8 @@ var options = dropDown.selectAll("option")
 		.attr("text-anchor", "end")
 		.attr("x", w -900)
 		.attr("y", h - margin.t +40)
-		.text("Type 1");
+		.text("Type 1")
+		.attr("font-weight", "bold");
 		// .bold();
 
 		
@@ -305,24 +373,23 @@ var options = dropDown.selectAll("option")
 		.text("Total");
 		
 		
-	dropDown.on("change", function() {
-      var selected = this.value;
-      displayOthers = this.checked ? "inline" : "none";
-      display = this.checked ? "none" : "inline";
+	// dropDown.on("change", function() {
+	//   var selected = this.value;
+	//   console.log(selected);
+    //   displayOthers = this.checked ? "inline" : "none";
+    //   display = this.checked ? "none" : "inline";
 
 
-      svg.selectAll(".circles")
-          .filter(function(d) {return selected != d.country;})
-          .attr("display", displayOthers);
+    //   svg.selectAll(".circles")
+    //       .filter(function(d) {return selected != d["Type_1"];})
+    //       .attr("display", displayOthers);
           
-      svg.selectAll(".circles")
-          .filter(function(d) {return selected == d.country;})
-          .attr("display", display);
-      });
+    //   svg.selectAll(".circles")
+    //       .filter(function(d) {return selected == d["Type_1"];})
+    //       .attr("display", display);
+    //   });
 
 });
-	// sort data alphabetically by region, so that the colors match with legend
-	// data(function(a) { return d3.ascending(a.Type_1); })//might need to put b.type_1 back in
-	// console.log(data)
+
 
 
